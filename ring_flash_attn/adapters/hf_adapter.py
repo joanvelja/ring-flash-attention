@@ -1,24 +1,15 @@
-import os
 import inspect
+import os
 from typing import Optional, Tuple
 
 import torch
 import torch.distributed as dist
 import transformers
 import transformers.modeling_flash_attention_utils
-try:
-    from transformers.modeling_flash_attention_utils import (
-        is_flash_attn_greater_or_equal_2_10,
-    )
-except ImportError:
-    # transformers <= 4.53.x
-    from transformers.modeling_flash_attention_utils import (
-        is_flash_attn_greater_or_equal_2_10,
-    )
 
 from ..llama3_flash_attn_varlen import (
-    llama3_flash_attn_varlen_func,
     llama3_flash_attn_prepare_cu_seqlens,
+    llama3_flash_attn_varlen_func,
 )
 
 try:
@@ -126,11 +117,10 @@ def create_ring_flash_attention_forward(
             else {}
         )
 
-        if is_flash_attn_greater_or_equal_2_10:
-            if deterministic is None:
-                deterministic = (
-                    os.environ.get("FLASH_ATTENTION_DETERMINISTIC", "0") == "1"
-                )
+        if deterministic is None:
+            deterministic = (
+                os.environ.get("FLASH_ATTENTION_DETERMINISTIC", "0") == "1"
+            )
         flash_kwargs["deterministic"] = deterministic
         assert (
             softcap is None
